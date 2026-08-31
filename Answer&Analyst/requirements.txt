@@ -1,0 +1,7 @@
+# Core agents/tools have zero third-party dependencies.
+# Install these only for the concrete LLM adapters you actually use:
+# openai>=1.0        # for llm.client.OpenAILLMClient AND llm.client.OpenRouterLLMClient
+#                     # (OpenRouter's API is OpenAI-compatible, so it reuses this SDK)
+# anthropic>=0.40     # for llm.client.AnthropicLLMClient
+
+pytest>=8.0  # for tests/
