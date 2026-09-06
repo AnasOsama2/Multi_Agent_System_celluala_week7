@@ -69,8 +69,23 @@ app.include_router(ingest_router)
 app.include_router(query_router)
 app.include_router(metadata_router)
 
+# Mount React Frontend assets if built
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"))
+assets_dir = os.path.join(frontend_dist, "assets")
+if os.path.isdir(assets_dir):
+    app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
 @app.get("/")
-async def root():
+async def root(request: Request):
+    accept = request.headers.get("accept", "")
+    if "text/html" in accept and os.path.isdir(frontend_dist):
+        index_file = os.path.join(frontend_dist, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
     return {
         "message": "Multi-Agent RAG & Document Pipeline API is running",
         "documentation": "/docs",

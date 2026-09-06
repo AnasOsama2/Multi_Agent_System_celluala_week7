@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     # Model configurations
     llm_model: str = "qwen/qwen3.8-27b"
     llm_temperature: float = 0.1
-    llm_max_tokens: int = 4096
+    llm_max_tokens: int = 800
 
     embedding_model: str = "BAAI/bge-m3"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"

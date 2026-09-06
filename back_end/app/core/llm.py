@@ -29,7 +29,7 @@ class GroqLLMClient:
     ) -> str:
         model = model or settings.llm_model
         temperature = temperature if temperature is not None else settings.llm_temperature
-        max_tokens = max_tokens or settings.llm_max_tokens
+        max_tokens = min(max_tokens or settings.llm_max_tokens, 800)
 
         response_format = {"type": "json_object"} if json_mode else None
 

@@ -17,10 +17,10 @@ async def get_schema_catalog():
     return {"status": "success", "catalog": catalog_text}
 
 @router.get("/tables/{table_name}")
-async def get_table_details(table_name: str):
+async def get_table_details(table_name: str, limit: int = 25):
     """Get columns, types, and sample rows for a specific SQL table."""
     columns = registry.get_table_schema(table_name)
-    sample_rows = sql_store.get_table_sample(table_name, limit=5)
+    sample_rows = sql_store.get_table_sample(table_name, limit=limit)
     return {
         "status": "success",
         "table_name": table_name,

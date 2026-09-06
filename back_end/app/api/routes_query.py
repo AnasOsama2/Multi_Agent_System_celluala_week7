@@ -22,6 +22,11 @@ class QueryResponse(BaseModel):
     confidence_score: float
     answer: str
     citations: List[Dict[str, Any]]
+    sources: List[str] = Field(default_factory=list)
+    findings: List[Dict[str, Any]] = Field(default_factory=list)
+    sufficiency: str = "ENOUGH"
+    tables: List[Dict[str, Any]] = Field(default_factory=list)
+    iterations_used: int = 0
     sql_executed: Optional[str] = None
     sql_rows_count: int = 0
     feedback_passed: bool
@@ -36,8 +41,9 @@ async def query_rag_agent(req: QueryRequest):
     3. Retrieval Confidence Evaluation.
     4. Adaptive Reranking (BAAI/bge-reranker-v2-m3).
     5. Parent Context Expansion.
-    6. LLM Generation with Qwen 3.8 27B.
-    7. Evaluator Feedback Loop & Self-Correction.
+    6. Analyst Agent (sufficiency assessment, feedback loop, calculations, findings).
+    7. Answer Agent (citation formatting, source rendering, final synthesis).
+    8. Evaluator Feedback Loop & Self-Correction.
     """
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty")
@@ -54,9 +60,15 @@ async def query_rag_agent(req: QueryRequest):
         "confidence_score": 0.0,
         "reranked_candidates": [],
         "top_candidates": [],
+        "evidence_chunks": [],
         "sql_result": {},
         "context_text": "",
         "citations": [],
+        "sources": [],
+        "findings": [],
+        "sufficiency": "ENOUGH",
+        "tables": [],
+        "iterations_used": 0,
         "answer": "",
         "feedback_passed": True,
         "feedback_details": {},
@@ -76,6 +88,11 @@ async def query_rag_agent(req: QueryRequest):
             confidence_score=final_state.get("confidence_score", 0.0),
             answer=final_state.get("answer", ""),
             citations=final_state.get("citations", []),
+            sources=final_state.get("sources", []),
+            findings=final_state.get("findings", []),
+            sufficiency=final_state.get("sufficiency", "ENOUGH"),
+            tables=final_state.get("tables", []),
+            iterations_used=final_state.get("iterations_used", 0),
             sql_executed=sql_res.get("sql"),
             sql_rows_count=len(sql_res.get("rows", [])),
             feedback_passed=final_state.get("feedback_passed", True),
